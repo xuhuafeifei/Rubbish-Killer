@@ -1,0 +1,14 @@
+{
+    "manifest_version": 3,
+    "name": "Rubbish-Killer",
+    "version": "1.0",
+    "action": {
+      "default_popup": "popup.html"
+    },
+    "permissions": ["storage"],
+    "content_scripts": [{
+      "matches": ["https://www.bing.com/*", "https://www.google.com.hk/*", "https://www.baidu.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }]
+  }
