@@ -1,46 +1,46 @@
 document.addEventListener('DOMContentLoaded', async () => {
-        const toggleEnabled = document.getElementById('toggleEnabled');
-        const toggleLabelOn = document.getElementById('toggleLabelOn');
-        const toggleLabelOff = document.getElementById('toggleLabelOff');
-    
-        let { enabled = true } = await chrome.storage.sync.get('enabled');
-        setMsg('enableOrNot', null, enabled);
-        toggleEnabled.checked = enabled;
+    // 过滤按钮的启动和禁用部分代码
+    const toggleEnabled = document.getElementById('toggleEnabled');
+    const toggleLabelOn = document.getElementById('toggleLabelOn');
+    const toggleLabelOff = document.getElementById('toggleLabelOff');
+
+    let { enabled = true } = await chrome.storage.sync.get('enabled');
+    setMsg('enableOrNot', null, enabled);
+    toggleEnabled.checked = enabled;
+    updateToggleLabels();
+
+    toggleEnabled.addEventListener('change', async () => {
+        enabled = toggleEnabled.checked;
+        await chrome.storage.sync.set({ enabled });
         updateToggleLabels();
-    
-        toggleEnabled.addEventListener('change', async () => {
-          enabled = toggleEnabled.checked;
-          await chrome.storage.sync.set({ enabled });
-          updateToggleLabels();
-          
-          if (enabled) {
+
+        if (enabled) {
             await enableFilter();
-          } else {
+        } else {
             await disableFilter();
-          }
-        });
-    
-        function updateToggleLabels() {
-          if (toggleEnabled.checked) {
+        }
+    });
+
+    function updateToggleLabels() {
+        if (toggleEnabled.checked) {
             toggleLabelOn.classList.add('active');
             toggleLabelOff.classList.remove('active');
-          } else {
+        } else {
             toggleLabelOn.classList.remove('active');
             toggleLabelOff.classList.add('active');
-          }
         }
+    }
 
-        async function enableFilter() {
-          setMsg('enableAll', null, null);
-        }
-        
-        async function disableFilter() {
-          console.log('Filter disabled');
-          setMsg('disableAll', null, null);
-        }
+    async function enableFilter() {
+        setMsg('enableAll', null, null);
+    }
 
-        /*-----------------------------------*/
+    async function disableFilter() {
+        console.log('Filter disabled');
+        setMsg('disableAll', null, null);
+    }
 
+    /*-----------------界面渲染 + 处理方法------------------*/
 
     const excludeList = document.getElementById('excludeList');
     const newExclude = document.getElementById('newExclude');
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 防抖函数
     function debounce(func, delay) {
         let timeout;
-        return function() {
+        return function () {
             const context = this;
             const args = arguments;
             clearTimeout(timeout);
@@ -109,6 +109,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         setTimeout(() => statusMessage.textContent = '', 3000);
     }
 
+    // 通信方法, 把数据同步给content.js
     function setMsg(typeName, originData, newData) {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             chrome.tabs.sendMessage(tabs[0].id, {
@@ -126,7 +127,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     addBtn.addEventListener('click', () => {
         const value = newExclude.value.trim();
         if (!value) return;
-        
+
         if (excludes.includes(value)) {
             showStatus('This item already exists');
             return;
