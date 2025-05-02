@@ -13,12 +13,27 @@ function getExcludeString() {
     return excludes.map(item => `-${item}`).join(' ');
 }
 
+function getInputSelectorName() {
+    // 检查是否是Bing
+    if (window.location.hostname.includes('bing.com')) {
+        return 'input[name="q"]';
+    }
+    // 检查是否是Google
+    else if (window.location.hostname.includes('google.com')) {
+        // 从你提供的HTML中可以看到Google的搜索框可能是textarea或input
+        // 现代Google搜索使用textarea.gLFyf
+        return 'textarea.gLFyf, input[name="q"]';
+    }
+    // 如果不是上述搜索引擎，返回一个通用的选择器（可选）
+    return 'input[name="q"], textarea[name="q"]';
+}
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.type === 'add') {
         excludes.push(request.newData)
 
         // 修改输入框内的内容
-        const searchInput = document.querySelector('input[name="q"]');
+        const searchInput = document.querySelector(getInputSelectorName());
         const modifyItem = '-' + request.newData
         if (searchInput && ! searchInput.value.includes(modifyItem)) {
             searchInput.value = searchInput.value + ' ' + modifyItem;
@@ -32,7 +47,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         console.log('remove', request.origin, ' excludes = ', excludes.join(','))
 
         // 移除输入框内的内容
-        const searchInput = document.querySelector('input[name="q"]');
+        const searchInput = document.querySelector(getInputSelectorName());
         const removeItem = '-' + request.origin
 
         if (searchInput && searchInput.value.includes(removeItem)) {
@@ -41,7 +56,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     } else if (request.type == 'modify') {
         // 修改输入框内的内容
-        const searchInput = document.querySelector('input[name="q"]');
+        const searchInput = document.querySelector(getInputSelectorName());
         const modifyItem = '-' + request.origin
         if (searchInput && searchInput.value.includes(modifyItem)) {
             console.log("modifyItem = ", modifyItem, " newData = ", request.newData)
@@ -55,7 +70,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         console.log('modify', request.origin, ' excludes = ', excludes.join(',')) 
     } else if (request.type == 'enableAll') {
         // 修改输入框内的内容
-        const searchInput = document.querySelector('input[name="q"]');
+        const searchInput = document.querySelector(getInputSelectorName());
         // 便利excludes数组，将每个元素添加到searchInput.value中
         excludes.forEach(item => {
             modifyItem = '-' + item
@@ -66,7 +81,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         enabled = true;
     } else if (request.type == 'disableAll') {
         // 修改输入框内的内容
-        const searchInput = document.querySelector('input[name="q"]');
+        const searchInput = document.querySelector(getInputSelectorName());
         // 便利excludes数组，将每个元素添从searchInput.value中移除
         excludes.forEach(item => {
             modifyItem = '-' + item
@@ -82,7 +97,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 
 function modifySearchInput() {
-    const searchInput = document.querySelector('input[name="q"]');
+    const searchInput = document.querySelector(getInputSelectorName());
     if (searchInput && !searchInput.dataset.modified) {
         searchInput.dataset.modified = "true";
 

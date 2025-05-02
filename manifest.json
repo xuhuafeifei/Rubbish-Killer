@@ -7,7 +7,7 @@
     },
     "permissions": ["storage"],
     "content_scripts": [{
-      "matches": ["https://www.bing.com/*", "https://www.google.com.hk/*", "https://www.baidu.com/*"],
+      "matches": ["https://cn.bing.com/*", "https://www.bing.com/*", "https://www.google.com.hk/*", "https://www.baidu.com/*"],
       "js": ["content.js"],
       "run_at": "document_end"
     }]
